@@ -9,9 +9,9 @@ import android.os.BatteryManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.qkmoc.moc.Bean.MocBean;
+import com.qkmoc.moc.Bean.MocAPPBean;
 import com.qkmoc.moc.io.MessageWritable;
-import com.qkmoc.moc.util.GsonUtil;
+import com.qkmoc.moc.util.JsonUtil;
 
 
 public class BatteryMonitor extends AbstractMonitor {
@@ -75,12 +75,12 @@ public class BatteryMonitor extends AbstractMonitor {
 
         TelephonyManager tm = (TelephonyManager) context.getSystemService(context.TELEPHONY_SERVICE);
 
-        MocBean mocBean = MocBean.getInstance();
+        MocAPPBean mocBean = MocAPPBean.getInstance();
         mocBean.setWIFI(String.valueOf(wm.isWifiEnabled()));
         mocBean.setBatteryLevel(state.level);
         mocBean.setBatterySourceLabel(sourceLabel(state.source));
         mocBean.setImei(tm.getDeviceId());
-        String gsonString = GsonUtil.GsonString(mocBean);
+        String gsonString = JsonUtil.beanToJson(mocBean);
         System.out.println(gsonString);
         writer.write(gsonString);
 //        try {

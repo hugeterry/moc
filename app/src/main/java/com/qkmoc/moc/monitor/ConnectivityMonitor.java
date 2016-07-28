@@ -8,9 +8,9 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
-import com.qkmoc.moc.Bean.MocBean;
+import com.qkmoc.moc.Bean.MocAPPBean;
 import com.qkmoc.moc.io.MessageWritable;
-import com.qkmoc.moc.util.GsonUtil;
+import com.qkmoc.moc.util.JsonUtil;
 
 
 public class ConnectivityMonitor extends AbstractMonitor {
@@ -64,16 +64,16 @@ public class ConnectivityMonitor extends AbstractMonitor {
                     info.isFailover() ? "failover" : "not failover",
                     info.isRoaming() ? "roaming" : "not roaming"
             ));
-            MocBean mocBean = MocBean.getInstance();
+            MocAPPBean mocBean = MocAPPBean.getInstance();
             mocBean.setConnIsConnected(info.isConnected() ? "connected" : "not connected");
             mocBean.setConnTypeName(info.getTypeName());
 
-            String gsonString = GsonUtil.GsonString(mocBean);
+            String gsonString = JsonUtil.beanToJson(mocBean);
             writer.write(gsonString);
         } else {
             Log.i(TAG, "No active network");
 
-            writer.write("No active network");
+//            writer.write("No active network");
         }
     }
 }

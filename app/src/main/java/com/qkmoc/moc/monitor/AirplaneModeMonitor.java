@@ -8,9 +8,9 @@ import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 
-import com.qkmoc.moc.Bean.MocBean;
+import com.qkmoc.moc.Bean.MocAPPBean;
 import com.qkmoc.moc.io.MessageWritable;
-import com.qkmoc.moc.util.GsonUtil;
+import com.qkmoc.moc.util.JsonUtil;
 
 
 public class AirplaneModeMonitor extends AbstractMonitor {
@@ -61,9 +61,9 @@ public class AirplaneModeMonitor extends AbstractMonitor {
 
     private void report(MessageWritable writer, boolean enabled) {
         Log.i(TAG, String.format("Airplane:%s", enabled ? "on" : "off"));
-        MocBean mocBean = MocBean.getInstance();
+        MocAPPBean mocBean = MocAPPBean.getInstance();
         mocBean.setAirplane(enabled ? "on" : "off");
-        String gsonString = GsonUtil.GsonString(mocBean);
+        String gsonString = JsonUtil.beanToJson(mocBean);
         writer.write(gsonString);
     }
 }

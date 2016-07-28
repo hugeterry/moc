@@ -4,20 +4,20 @@ package com.qkmoc.moc.Bean;
  * Created by hugeterry(http://hugeterry.cn)
  * Date: 16/7/28 16:05
  */
-public class MocBean {
+public class MocAPPBean {
 
-    private static MocBean mocBean;
-    private String Airplane = ""; //飞行模式
-    private String WIFI = ""; //wifi
-    private String BatterySourceLabel = ""; //连接类型（USB）
+    private static MocAPPBean mocBean;
+    private String Airplane = "on"; //飞行模式
+    private String WIFI = "false"; //wifi
+    private String BatterySourceLabel = "USB"; //连接类型（USB）
     private int BatteryLevel = 100;//电量
-    private String ConnTypeName = "";//网络通信类型
-    private String ConnIsConnected = "";//是否有网络通信
-    private String imei = "";//imei
+    private String ConnTypeName = "LTE";//网络通信类型
+    private String ConnIsConnected = "connected";//是否有网络通信
+    private String imei = "00000000000000";//imei
 
-    public static MocBean getInstance() {
+    public static MocAPPBean getInstance() {
         if (mocBean == null) {
-            mocBean = new MocBean();
+            mocBean = new MocAPPBean();
         }
         return mocBean;
     }

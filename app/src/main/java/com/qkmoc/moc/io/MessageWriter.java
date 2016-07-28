@@ -28,7 +28,6 @@ public class MessageWriter implements MessageWritable {
                     String str = "HugeTerry";
                     byte[] srtbyte = message.getBytes();
                     out.write(srtbyte);
-//                    message.writeDelimitedTo(out);
                     System.out.println("message::::::::::" + message);
                 } catch (IOException e) {
                     // The socket went away
