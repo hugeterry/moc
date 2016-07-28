@@ -68,34 +68,8 @@ public class BatteryMonitor extends AbstractMonitor {
                 state.voltage / 1000.0
         ));
 
-//        writer.write(Wire.Envelope.newBuilder()
-//                .setType(Wire.MessageType.EVENT_BATTERY)
-//                .setMessage(Wire.BatteryEvent.newBuilder()
-//                        .setStatus(statusLabel(state.status))
-//                        .setHealth(healthLabel(state.health))
-//                        .setSource(sourceLabel(state.source))
-//                        .setLevel(state.level)
-//                        .setScale(state.scale)
-//                        .setTemp(state.temp / 10.0)
-//                        .setVoltage(state.voltage / 1000.0)
-//                        .build()
-//                        .toByteString())
-//                .build());
-//        Wire.BatteryEvent be = Wire.BatteryEvent.newBuilder()
-//                .setStatus(statusLabel(state.status))
-//                .setHealth(healthLabel(state.health))
-//                .setSource(sourceLabel(state.source))
-//                .setLevel(state.level)
-//                .setScale(state.scale)
-//                .setTemp(state.temp / 10.0)
-//                .setVoltage(state.voltage / 1000.0)
-//                .build();
-//        Wire.Envelope en = Wire.Envelope.newBuilder()
-//                .setType(Wire.MessageType.EVENT_BATTERY)
-//                .setMessage(be.toByteString())
-//                .build();
         WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        writer.write(String.format("Battery : %s; %d/%d ;wifi： %s",
+        writer.write(String.format("Battery:%s;%d/%d;wifi:%s",
                 sourceLabel(state.source),
                 state.level,
                 state.scale

@@ -39,14 +39,11 @@ public class ConnectivityMonitor extends AbstractMonitor {
                     wait();
                 }
             }
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             // Okay
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        }
-        finally {
+        } finally {
             Log.i(TAG, "Monitor stopping");
 
             context.unregisterReceiver(receiver);
@@ -66,15 +63,12 @@ public class ConnectivityMonitor extends AbstractMonitor {
                     info.isRoaming() ? "roaming" : "not roaming"
             ));
 
-            writer.write(String.format("Network %s/%s is %s; %s; %s",
-            info.getTypeName(),
+            writer.write(String.format("Network %s/%s is %s;",
+                    info.getTypeName(),
                     info.getSubtypeName(),
-                    info.isConnected() ? "connected" : "not connected",
-                    info.isFailover() ? "failover" : "not failover",
-                    info.isRoaming() ? "roaming" : "not roaming"
+                    info.isConnected() ? "connected" : "not connected"
             ));
-        }
-        else {
+        } else {
             Log.i(TAG, "No active network");
 
             writer.write("No active network");

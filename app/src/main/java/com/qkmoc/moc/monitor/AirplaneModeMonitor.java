@@ -62,8 +62,8 @@ public class AirplaneModeMonitor extends AbstractMonitor {
     }
 
     private void report(MessageWritable writer, boolean enabled) {
-        Log.i(TAG, String.format("Airplane mode is %s", enabled ? "on" : "off"));
+        Log.i(TAG, String.format("Airplane:%s", enabled ? "on" : "off"));
 
-        writer.write(String.format("Airplane mode is %s", enabled ? "on" : "off"));
+        writer.write(String.format("Airplane:%s", enabled ? "on" : "off"));
     }
 }
