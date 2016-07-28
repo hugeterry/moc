@@ -10,6 +10,9 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.qkmoc.moc.R;
+import com.qkmoc.moc.io.MessageWriter;
+import com.qkmoc.moc.monitor.AbstractMonitor;
+import com.qkmoc.moc.monitor.BatteryMonitor;
 import com.qkmoc.moc.view.IdentityActivity;
 
 import java.io.IOException;
@@ -17,6 +20,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -33,13 +38,17 @@ public class Service extends android.app.Service {
     public static final String EXTRA_HOST = "com.qkmoc.moc.EXTRA_HOST";
     public static final String EXTRA_BACKLOG = "com.qkmoc.moc.EXTRA_BACKLOG";
 
+
     private static final String TAG = "STFService";
     private static final int NOTIFICATION_ID = 0x1;
 
+    private List<AbstractMonitor> monitors = new ArrayList<AbstractMonitor>();
     private ExecutorService executor = Executors.newCachedThreadPool();
     private ServerSocket acceptor;
     private boolean started = false;
+    private MessageWriter.Pool writers = new MessageWriter.Pool();
 
+    // We can only access CLIPBOARD_SERVICE from the main thread
     private static Object clipboardManager;
 
     public static Object getClipboardManager() {
@@ -82,8 +91,7 @@ public class Service extends android.app.Service {
         if (acceptor != null) {
             try {
                 acceptor.close();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 // We don't care
             }
         }
@@ -91,11 +99,9 @@ public class Service extends android.app.Service {
         try {
             executor.shutdownNow();
             executor.awaitTermination(10, TimeUnit.SECONDS);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             // Too bad
-        }
-        finally {
+        } finally {
             started = false;
 
             Process.killProcess(Process.myPid());
@@ -120,28 +126,23 @@ public class Service extends android.app.Service {
 
                 try {
                     acceptor = new ServerSocket(port, backlog, InetAddress.getByName(host));
-
+                    addMonitor(new BatteryMonitor(this, writers));
 
 
                     executor.submit(new Server(acceptor));
 
                     started = true;
-                }
-                catch (UnknownHostException e) {
+                } catch (UnknownHostException e) {
                     Log.e(TAG, e.getMessage());
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
-            else {
+            } else {
                 Log.w(TAG, "Service is already running");
             }
-        }
-        else if (ACTION_STOP.equals(action)) {
+        } else if (ACTION_STOP.equals(action)) {
             stopSelf();
-        }
-        else {
+        } else {
             Log.e(TAG, "Unknown action " + action);
         }
 
@@ -153,6 +154,10 @@ public class Service extends android.app.Service {
         Log.w(TAG, "Low memory");
     }
 
+    private void addMonitor(AbstractMonitor monitor) {
+        monitors.add(monitor);
+        executor.submit(monitor);
+    }
 
     class Server extends Thread {
         private ServerSocket acceptor;
@@ -168,8 +173,7 @@ public class Service extends android.app.Service {
 
             try {
                 acceptor.close();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -186,16 +190,13 @@ public class Service extends android.app.Service {
                     Connection conn = new Connection(acceptor.accept());
                     executor.submit(conn);
                 }
-            }
-            catch (IOException e) {
-            }
-            finally {
-                Log.i(TAG, "Server stopping" );
+            } catch (IOException e) {
+            } finally {
+                Log.i(TAG, "Server stopping");
 
                 try {
                     acceptor.close();
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                 }
 
                 stopSelf();
@@ -215,14 +216,46 @@ public class Service extends android.app.Service {
 
                 try {
                     socket.close();
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
 
             @Override
-            public void run() {}
+            public void run() {
+                Log.i(TAG, "Connection started");
+
+                MessageWriter writer = null;
+
+                try {
+                    writer = new MessageWriter(socket.getOutputStream());
+                    writers.add(writer);
+                    for (AbstractMonitor monitor : monitors) {
+                        monitor.peek(writer);
+                    }
+
+                }
+                catch (IOException e) {
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+                finally {
+                    Log.i(TAG, "Connection stopping");
+
+                    writers.remove(writer);
+
+
+                    try {
+                        socket.close();
+                    }
+                    catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+
+            }
         }
     }
 }
