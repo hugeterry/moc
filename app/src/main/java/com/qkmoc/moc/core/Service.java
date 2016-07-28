@@ -127,8 +127,7 @@ public class Service extends android.app.Service {
                 try {
                     acceptor = new ServerSocket(port, backlog, InetAddress.getByName(host));
                     addMonitor(new BatteryMonitor(this, writers));
-
-
+                    addMonitor(new BatteryMonitor(this, writers));
                     executor.submit(new Server(acceptor));
 
                     started = true;
