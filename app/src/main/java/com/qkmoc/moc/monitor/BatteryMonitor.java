@@ -6,9 +6,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.qkmoc.moc.Bean.MocBean;
 import com.qkmoc.moc.io.MessageWritable;
+import com.qkmoc.moc.util.GsonUtil;
 
 
 public class BatteryMonitor extends AbstractMonitor {
@@ -69,12 +72,17 @@ public class BatteryMonitor extends AbstractMonitor {
         ));
 
         WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        writer.write(String.format("Battery:%s;%d/%d;wifi:%s",
-                sourceLabel(state.source),
-                state.level,
-                state.scale
-                , wm.isWifiEnabled()
-        ));
+
+        TelephonyManager tm = (TelephonyManager) context.getSystemService(context.TELEPHONY_SERVICE);
+
+        MocBean mocBean = MocBean.getInstance();
+        mocBean.setWIFI(String.valueOf(wm.isWifiEnabled()));
+        mocBean.setBatteryLevel(state.level);
+        mocBean.setBatterySourceLabel(sourceLabel(state.source));
+        mocBean.setImei(tm.getDeviceId());
+        String gsonString = GsonUtil.GsonString(mocBean);
+        System.out.println(gsonString);
+        writer.write(gsonString);
 //        try {
 //            //反序列化
 //            Wire.BatteryEvent newBe = Wire.BatteryEvent.parseFrom(be.toByteString());

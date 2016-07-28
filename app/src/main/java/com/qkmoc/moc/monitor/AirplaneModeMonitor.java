@@ -8,7 +8,9 @@ import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.qkmoc.moc.Bean.MocBean;
 import com.qkmoc.moc.io.MessageWritable;
+import com.qkmoc.moc.util.GsonUtil;
 
 
 public class AirplaneModeMonitor extends AbstractMonitor {
@@ -37,14 +39,11 @@ public class AirplaneModeMonitor extends AbstractMonitor {
                     wait();
                 }
             }
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             // Okay
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        }
-        finally {
+        } finally {
             Log.i(TAG, "Monitor stopping");
 
             context.unregisterReceiver(receiver);
@@ -55,15 +54,16 @@ public class AirplaneModeMonitor extends AbstractMonitor {
     public void peek(MessageWritable writer) {
         if (Build.VERSION.SDK_INT >= 17) {
             report(writer, Settings.Global.getInt(context.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 0) == 1);
-        }
-        else {
+        } else {
             report(writer, Settings.System.getInt(context.getContentResolver(), Settings.System.AIRPLANE_MODE_ON, 0) == 1);
         }
     }
 
     private void report(MessageWritable writer, boolean enabled) {
         Log.i(TAG, String.format("Airplane:%s", enabled ? "on" : "off"));
-
-        writer.write(String.format("Airplane:%s", enabled ? "on" : "off"));
+        MocBean mocBean = MocBean.getInstance();
+        mocBean.setAirplane(enabled ? "on" : "off");
+        String gsonString = GsonUtil.GsonString(mocBean);
+        writer.write(gsonString);
     }
 }

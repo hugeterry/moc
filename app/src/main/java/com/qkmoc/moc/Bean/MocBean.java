@@ -5,13 +5,15 @@ package com.qkmoc.moc.Bean;
  * Date: 16/7/28 16:05
  */
 public class MocBean {
+
     private static MocBean mocBean;
-    private static String Airplane;
-    private static String BatterySourceLabel;
-    private static String BatteryLevel;
-    private static String ConnTypeName;
-    private static String ConnIsConnected;
-    private static String imei;
+    private String Airplane = ""; //飞行模式
+    private String WIFI = ""; //wifi
+    private String BatterySourceLabel = ""; //连接类型（USB）
+    private int BatteryLevel = 100;//电量
+    private String ConnTypeName = "";//网络通信类型
+    private String ConnIsConnected = "";//是否有网络通信
+    private String imei = "";//imei
 
     public static MocBean getInstance() {
         if (mocBean == null) {
@@ -28,6 +30,14 @@ public class MocBean {
         Airplane = airplane;
     }
 
+    public String getWIFI() {
+        return WIFI;
+    }
+
+    public void setWIFI(String WIFI) {
+        this.WIFI = WIFI;
+    }
+
     public String getBatterySourceLabel() {
         return BatterySourceLabel;
     }
@@ -36,11 +46,11 @@ public class MocBean {
         BatterySourceLabel = batterySourceLabel;
     }
 
-    public String getBatteryLevel() {
+    public int getBatteryLevel() {
         return BatteryLevel;
     }
 
-    public void setBatteryLevel(String batteryLevel) {
+    public void setBatteryLevel(int batteryLevel) {
         BatteryLevel = batteryLevel;
     }
 
