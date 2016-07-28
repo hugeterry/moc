@@ -11,6 +11,7 @@ import android.util.Log;
 
 import com.qkmoc.moc.R;
 import com.qkmoc.moc.io.MessageReader;
+import com.qkmoc.moc.io.MessageRouter;
 import com.qkmoc.moc.io.MessageWriter;
 import com.qkmoc.moc.monitor.AbstractMonitor;
 import com.qkmoc.moc.monitor.AirplaneModeMonitor;
@@ -245,17 +246,26 @@ public class Service extends android.app.Service {
                 Log.i(TAG, "Connection started");
 
                 MessageWriter writer = null;
+                MessageRouter router = null;
 
                 try {
                     MessageReader reader = new MessageReader(socket.getInputStream());
                     writer = new MessageWriter(socket.getOutputStream());
                     writers.add(writer);
-
+                    router = new MessageRouter(writer);
 
                     for (AbstractMonitor monitor : monitors) {
                         monitor.peek(writer);
                     }
+                    while (!isInterrupted()) {
+                       String str = reader.read();
 
+                        if (str == null) {
+                            break;
+                        }
+
+                        router.route(str);
+                    }
                 }
                 catch (IOException e) {
                 }
