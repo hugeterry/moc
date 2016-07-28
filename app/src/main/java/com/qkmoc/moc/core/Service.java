@@ -10,9 +10,14 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.qkmoc.moc.R;
+import com.qkmoc.moc.io.MessageReader;
 import com.qkmoc.moc.io.MessageWriter;
 import com.qkmoc.moc.monitor.AbstractMonitor;
+import com.qkmoc.moc.monitor.AirplaneModeMonitor;
 import com.qkmoc.moc.monitor.BatteryMonitor;
+import com.qkmoc.moc.monitor.BrowserPackageMonitor;
+import com.qkmoc.moc.monitor.ConnectivityMonitor;
+import com.qkmoc.moc.monitor.PhoneStateMonitor;
 import com.qkmoc.moc.view.IdentityActivity;
 
 import java.io.IOException;
@@ -126,22 +131,32 @@ public class Service extends android.app.Service {
 
                 try {
                     acceptor = new ServerSocket(port, backlog, InetAddress.getByName(host));
+
                     addMonitor(new BatteryMonitor(this, writers));
-                    addMonitor(new BatteryMonitor(this, writers));
+                    addMonitor(new ConnectivityMonitor(this, writers));
+                    addMonitor(new PhoneStateMonitor(this, writers));
+                    addMonitor(new AirplaneModeMonitor(this, writers));
+                    addMonitor(new BrowserPackageMonitor(this, writers));
+
                     executor.submit(new Server(acceptor));
 
                     started = true;
-                } catch (UnknownHostException e) {
+                }
+                catch (UnknownHostException e) {
                     Log.e(TAG, e.getMessage());
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
                     e.printStackTrace();
                 }
-            } else {
+            }
+            else {
                 Log.w(TAG, "Service is already running");
             }
-        } else if (ACTION_STOP.equals(action)) {
+        }
+        else if (ACTION_STOP.equals(action)) {
             stopSelf();
-        } else {
+        }
+        else {
             Log.e(TAG, "Unknown action " + action);
         }
 
@@ -172,7 +187,8 @@ public class Service extends android.app.Service {
 
             try {
                 acceptor.close();
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -189,13 +205,16 @@ public class Service extends android.app.Service {
                     Connection conn = new Connection(acceptor.accept());
                     executor.submit(conn);
                 }
-            } catch (IOException e) {
-            } finally {
-                Log.i(TAG, "Server stopping");
+            }
+            catch (IOException e) {
+            }
+            finally {
+                Log.i(TAG, "Server stopping" );
 
                 try {
                     acceptor.close();
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
                 }
 
                 stopSelf();
@@ -215,7 +234,8 @@ public class Service extends android.app.Service {
 
                 try {
                     socket.close();
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -227,8 +247,11 @@ public class Service extends android.app.Service {
                 MessageWriter writer = null;
 
                 try {
+                    MessageReader reader = new MessageReader(socket.getInputStream());
                     writer = new MessageWriter(socket.getOutputStream());
                     writers.add(writer);
+
+
                     for (AbstractMonitor monitor : monitors) {
                         monitor.peek(writer);
                     }
@@ -244,7 +267,6 @@ public class Service extends android.app.Service {
 
                     writers.remove(writer);
 
-
                     try {
                         socket.close();
                     }
@@ -252,7 +274,6 @@ public class Service extends android.app.Service {
                         e.printStackTrace();
                     }
                 }
-
 
             }
         }

@@ -1,6 +1,5 @@
 package com.qkmoc.moc.io;
 
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
@@ -13,9 +12,10 @@ public class MessageWriter implements MessageWritable {
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     private OutputStream out;
 
-    public static interface Writable {
-        public void write(final String message);
-    }
+//    public static interface Writable {
+//        public void write(final GeneratedMessage message);
+//    }
+
     public MessageWriter(OutputStream out) {
         this.out = out;
     }
@@ -25,10 +25,11 @@ public class MessageWriter implements MessageWritable {
             @Override
             public void run() {
                 try {
-                    String s="HugeTerry";
-                    byte[] srtbyte = s.getBytes();
-                    System.out.println("message::::::::::" + message);
+                    String str = "HugeTerry";
+                    byte[] srtbyte = message.getBytes();
                     out.write(srtbyte);
+//                    message.writeDelimitedTo(out);
+                    System.out.println("message::::::::::" + message);
                 } catch (IOException e) {
                     // The socket went away
                     executor.shutdownNow();

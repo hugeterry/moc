@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private void initView() {
         if (intent == null) {
             intent = new Intent(MainActivity.this, Service.class);
-//            intent.setAction("jp.co.cyberagent.stf.ACTION_START");
+            intent.setAction(Service.ACTION_START);
         }
 
         bt_startService = (Button) findViewById(R.id.bt_startService);

@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.util.Log;
 
@@ -67,16 +68,47 @@ public class BatteryMonitor extends AbstractMonitor {
                 state.voltage / 1000.0
         ));
 
-        writer.write(String.format("Battery is %s (%s health); connected via %s; level at %d/%d; temp %.1fC@%.3fV",
-                statusLabel(state.status),
-                healthLabel(state.health),
+//        writer.write(Wire.Envelope.newBuilder()
+//                .setType(Wire.MessageType.EVENT_BATTERY)
+//                .setMessage(Wire.BatteryEvent.newBuilder()
+//                        .setStatus(statusLabel(state.status))
+//                        .setHealth(healthLabel(state.health))
+//                        .setSource(sourceLabel(state.source))
+//                        .setLevel(state.level)
+//                        .setScale(state.scale)
+//                        .setTemp(state.temp / 10.0)
+//                        .setVoltage(state.voltage / 1000.0)
+//                        .build()
+//                        .toByteString())
+//                .build());
+//        Wire.BatteryEvent be = Wire.BatteryEvent.newBuilder()
+//                .setStatus(statusLabel(state.status))
+//                .setHealth(healthLabel(state.health))
+//                .setSource(sourceLabel(state.source))
+//                .setLevel(state.level)
+//                .setScale(state.scale)
+//                .setTemp(state.temp / 10.0)
+//                .setVoltage(state.voltage / 1000.0)
+//                .build();
+//        Wire.Envelope en = Wire.Envelope.newBuilder()
+//                .setType(Wire.MessageType.EVENT_BATTERY)
+//                .setMessage(be.toByteString())
+//                .build();
+        WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        writer.write(String.format("Battery : %s; %d/%d ;wifi： %s",
                 sourceLabel(state.source),
                 state.level,
-                state.scale,
-                state.temp / 10.0,
-                state.voltage / 1000.0
+                state.scale
+                , wm.isWifiEnabled()
         ));
-        System.out.println("writer.write");
+//        try {
+//            //反序列化
+//            Wire.BatteryEvent newBe = Wire.BatteryEvent.parseFrom(be.toByteString());
+////            System.out.println(newBe);
+//        } catch (InvalidProtocolBufferException e) {
+//            e.printStackTrace();
+//        }
+
 
     }
 
