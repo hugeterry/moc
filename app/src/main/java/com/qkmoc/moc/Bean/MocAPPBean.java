@@ -7,6 +7,8 @@ package com.qkmoc.moc.Bean;
 public class MocAPPBean {
 
     private static MocAPPBean mocBean;
+
+    private int id = 0;//id
     private String Airplane = "on"; //飞行模式
     private String WIFI = "false"; //wifi
     private String BatterySourceLabel = "USB"; //连接类型（USB）
@@ -20,6 +22,14 @@ public class MocAPPBean {
             mocBean = new MocAPPBean();
         }
         return mocBean;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getAirplane() {
