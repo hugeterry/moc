@@ -25,10 +25,8 @@ public class MessageWriter implements MessageWritable {
             @Override
             public void run() {
                 try {
-                    String str = "HugeTerry";
                     byte[] srtbyte = message.getBytes();
                     out.write(srtbyte);
-                    System.out.println("message::::::::::" + message);
                 } catch (IOException e) {
                     // The socket went away
                     executor.shutdownNow();
