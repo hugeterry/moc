@@ -11,11 +11,23 @@ public class MessageReader {
         this.in = in;
     }
 
-    public String read() throws IOException {
-        byte[] buffer=new byte[1024];
-        in.read(buffer);//读取
+    public String read() {
+        String s = null;
+        int len = 0;
+        try {
+            while (len == 0) {
+                len = in.available();
+            }
+            if (len != 0) {
+                byte[] buffer = new byte[len];
+                in.read(buffer);//读取
+                s = new String(buffer);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("str:::::::" + e);
+        }
 
-        String s =new String(buffer);
         return s;
     }
 }

@@ -15,6 +15,8 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.qkmoc.moc.Bean.MocAPPBean;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -50,7 +52,9 @@ public class IdentityActivity extends Activity {
         if (serial == null) {
             serial = getProperty("ro.serialno", "unknown");
         }
-
+        MocAPPBean mocBean = MocAPPBean.getInstance();
+        layout.addView(createLabel("手机ID"));
+        layout.addView(createData(String.valueOf(mocBean.getId())));
         layout.addView(createLabel("SERIAL"));
         layout.addView(createData(serial));
         layout.addView(createLabel("MODEL"));
@@ -107,20 +111,16 @@ public class IdentityActivity extends Activity {
             Class<?> SystemProperties = Class.forName("android.os.SystemProperties");
             Method get = SystemProperties.getMethod("get", String.class, String.class);
             return (String) get.invoke(SystemProperties, name, defaultValue);
-        }
-        catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             Log.e(TAG, "Class.forName() failed", e);
             return defaultValue;
-        }
-        catch (NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             Log.e(TAG, "getMethod() failed", e);
             return defaultValue;
-        }
-        catch (InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             Log.e(TAG, "invoke() failed", e);
             return defaultValue;
-        }
-        catch (IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             Log.e(TAG, "invoke() failed", e);
             return defaultValue;
         }

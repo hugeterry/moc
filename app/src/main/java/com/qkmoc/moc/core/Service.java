@@ -9,6 +9,7 @@ import android.os.Process;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.qkmoc.moc.Bean.MocAPPBean;
 import com.qkmoc.moc.R;
 import com.qkmoc.moc.io.MessageReader;
 import com.qkmoc.moc.io.MessageRouter;
@@ -22,6 +23,7 @@ import com.qkmoc.moc.monitor.PhoneStateMonitor;
 import com.qkmoc.moc.view.IdentityActivity;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -43,7 +45,7 @@ public class Service extends android.app.Service {
     public static final String EXTRA_PORT = "com.qkmoc.moc.EXTRA_PORT";
     public static final String EXTRA_HOST = "com.qkmoc.moc.EXTRA_HOST";
     public static final String EXTRA_BACKLOG = "com.qkmoc.moc.EXTRA_BACKLOG";
-
+    InputStream in;
 
     private static final String TAG = "STFService";
     private static final int NOTIFICATION_ID = 0x1;
@@ -142,22 +144,17 @@ public class Service extends android.app.Service {
                     executor.submit(new Server(acceptor));
 
                     started = true;
-                }
-                catch (UnknownHostException e) {
+                } catch (UnknownHostException e) {
                     Log.e(TAG, e.getMessage());
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
-            else {
+            } else {
                 Log.w(TAG, "Service is already running");
             }
-        }
-        else if (ACTION_STOP.equals(action)) {
+        } else if (ACTION_STOP.equals(action)) {
             stopSelf();
-        }
-        else {
+        } else {
             Log.e(TAG, "Unknown action " + action);
         }
 
@@ -188,8 +185,7 @@ public class Service extends android.app.Service {
 
             try {
                 acceptor.close();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -202,20 +198,19 @@ public class Service extends android.app.Service {
             ));
 
             try {
+                System.out.println("eeeeeeeeee");
                 while (!isInterrupted()) {
+                    System.out.println("dddddddddddd");
                     Connection conn = new Connection(acceptor.accept());
                     executor.submit(conn);
                 }
-            }
-            catch (IOException e) {
-            }
-            finally {
-                Log.i(TAG, "Server stopping" );
+            } catch (IOException e) {
+            } finally {
+                Log.i(TAG, "Server stopping");
 
                 try {
                     acceptor.close();
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                 }
 
                 stopSelf();
@@ -235,8 +230,7 @@ public class Service extends android.app.Service {
 
                 try {
                     socket.close();
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -249,38 +243,45 @@ public class Service extends android.app.Service {
                 MessageRouter router = null;
 
                 try {
+//                    byte[] buf = new byte[1024];
+//                    in = socket.getInputStream();
+//                    String string = new String(buf);
+//                    System.out.println("c" + string);
+//                    System.out.println("ssssssss");
                     MessageReader reader = new MessageReader(socket.getInputStream());
                     writer = new MessageWriter(socket.getOutputStream());
                     writers.add(writer);
                     router = new MessageRouter(writer);
+                    System.out.println("xxxxxxxxxxxxx");
 
                     for (AbstractMonitor monitor : monitors) {
                         monitor.peek(writer);
                     }
                     while (!isInterrupted()) {
-                       String str = reader.read();
-
+                        String str = reader.read();
+                        System.out.println("strnull:" + str);
                         if (str == null) {
                             break;
+                        } else {
+                            int id = Integer.parseInt(str);
+                            MocAPPBean mocBean = MocAPPBean.getInstance();
+                            mocBean.setId(id);
                         }
 
                         router.route(str);
                     }
-                }
-                catch (IOException e) {
-                }
-                catch (Exception e) {
+                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
-                }
-                finally {
+                } finally {
                     Log.i(TAG, "Connection stopping");
 
                     writers.remove(writer);
 
                     try {
+                        in.close();
                         socket.close();
-                    }
-                    catch (IOException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
