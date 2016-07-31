@@ -54,7 +54,14 @@ public class IdentityActivity extends Activity {
         }
         MocAPPBean mocBean = MocAPPBean.getInstance();
         layout.addView(createLabel("手机ID"));
-        layout.addView(createData(String.valueOf(mocBean.getId())));
+
+        TextView tv = new TextView(this);
+        tv.setText(String.valueOf(mocBean.getId()));
+        tv.setTextColor(Color.parseColor("#FFFFFF"));
+        tv.setGravity(Gravity.CENTER);
+        tv.setTextSize(80);
+
+        layout.addView(tv);
         layout.addView(createLabel("SERIAL"));
         layout.addView(createData(serial));
         layout.addView(createLabel("MODEL"));
