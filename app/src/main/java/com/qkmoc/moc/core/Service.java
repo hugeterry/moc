@@ -24,6 +24,7 @@ import com.qkmoc.moc.view.IdentityActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -45,7 +46,6 @@ public class Service extends android.app.Service {
     public static final String EXTRA_PORT = "com.qkmoc.moc.EXTRA_PORT";
     public static final String EXTRA_HOST = "com.qkmoc.moc.EXTRA_HOST";
     public static final String EXTRA_BACKLOG = "com.qkmoc.moc.EXTRA_BACKLOG";
-    InputStream in;
 
     private static final String TAG = "STFService";
     private static final int NOTIFICATION_ID = 0x1;
@@ -268,9 +268,10 @@ public class Service extends android.app.Service {
                             mocBean.setId(id);
                         }
 
-                        router.route(str);
+//                        router.route(str);
                     }
                 } catch (IOException e) {
+                    e.printStackTrace();
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -279,7 +280,6 @@ public class Service extends android.app.Service {
                     writers.remove(writer);
 
                     try {
-                        in.close();
                         socket.close();
                     } catch (IOException e) {
                         e.printStackTrace();
