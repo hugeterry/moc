@@ -6,9 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.os.Process;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.qkmoc.moc.Bean.InfoToAPPBean;
@@ -69,6 +71,8 @@ public class Service extends android.app.Service {
         return clipboardManager;
     }
 
+    private PowerManager.WakeLock wakeLock;
+
     @Override
     public IBinder onBind(Intent intent) {
         // We don't support binding to this service
@@ -78,7 +82,6 @@ public class Service extends android.app.Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
         context = this;
         clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE);
 
@@ -102,7 +105,9 @@ public class Service extends android.app.Service {
         Log.i(TAG, "Stopping service");
 
         stopForeground(true);
-
+        if (wakeLock != null) {
+            wakeLock.release();
+        }
         if (acceptor != null) {
             try {
                 acceptor.close();
@@ -129,8 +134,11 @@ public class Service extends android.app.Service {
         String action = intent.getAction();
         if (ACTION_START.equals(action)) {
             if (!started) {
+                wakeLock = ((PowerManager) getSystemService(POWER_SERVICE))
+                        .newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK
+                                | PowerManager.ON_AFTER_RELEASE, TAG);
+                wakeLock.acquire();
                 Log.i(TAG, "Starting service");
-
                 int port = intent.getIntExtra(EXTRA_PORT, 1100);
                 int backlog = intent.getIntExtra(EXTRA_BACKLOG, 1);
 
@@ -268,7 +276,7 @@ public class Service extends android.app.Service {
                         } else if (copytext != null) {
                             CopyUtil.copyToClipBoard(context, copytext);
                             Looper.prepare();
-                            Toast.makeText(context, "群控大师:字段已复制到手机", Toast.LENGTH_LONG         ).show();
+                            Toast.makeText(context, "群控大师:字段已复制到手机", Toast.LENGTH_LONG).show();
                             Looper.loop();
                         }
 
