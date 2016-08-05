@@ -5,10 +5,13 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Process;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.qkmoc.moc.Bean.InfoToAPPBean;
 import com.qkmoc.moc.Bean.MocAPPBean;
 import com.qkmoc.moc.R;
 import com.qkmoc.moc.io.MessageReader;
@@ -20,6 +23,8 @@ import com.qkmoc.moc.monitor.BatteryMonitor;
 import com.qkmoc.moc.monitor.BrowserPackageMonitor;
 import com.qkmoc.moc.monitor.ConnectivityMonitor;
 import com.qkmoc.moc.monitor.PhoneStateMonitor;
+import com.qkmoc.moc.util.CopyUtil;
+import com.qkmoc.moc.util.JsonUtil;
 import com.qkmoc.moc.view.IdentityActivity;
 
 import java.io.IOException;
@@ -56,6 +61,7 @@ public class Service extends android.app.Service {
     private boolean started = false;
     private MessageWriter.Pool writers = new MessageWriter.Pool();
 
+    private Context context;
     // We can only access CLIPBOARD_SERVICE from the main thread
     private static Object clipboardManager;
 
@@ -73,6 +79,7 @@ public class Service extends android.app.Service {
     public void onCreate() {
         super.onCreate();
 
+        context = this;
         clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE);
 
         Intent notificationIntent = new Intent(this, IdentityActivity.class);
@@ -198,9 +205,7 @@ public class Service extends android.app.Service {
             ));
 
             try {
-                System.out.println("eeeeeeeeee");
                 while (!isInterrupted()) {
-                    System.out.println("dddddddddddd");
                     Connection conn = new Connection(acceptor.accept());
                     executor.submit(conn);
                 }
@@ -238,34 +243,33 @@ public class Service extends android.app.Service {
             @Override
             public void run() {
                 Log.i(TAG, "Connection started");
-
                 MessageWriter writer = null;
                 MessageRouter router = null;
 
                 try {
-//                    byte[] buf = new byte[1024];
-//                    in = socket.getInputStream();
-//                    String string = new String(buf);
-//                    System.out.println("c" + string);
-//                    System.out.println("ssssssss");
                     MessageReader reader = new MessageReader(socket.getInputStream());
                     writer = new MessageWriter(socket.getOutputStream());
                     writers.add(writer);
                     router = new MessageRouter(writer);
-                    System.out.println("xxxxxxxxxxxxx");
 
                     for (AbstractMonitor monitor : monitors) {
                         monitor.peek(writer);
                     }
                     while (!isInterrupted()) {
                         String str = reader.read();
-                        System.out.println("strnull:" + str);
-                        if (str == null) {
-                            break;
-                        } else {
-                            int id = Integer.parseInt(str);
+//                        System.out.println("strnull:" + str);
+                        InfoToAPPBean infoToAPPBean = new InfoToAPPBean();
+                        infoToAPPBean = JsonUtil.jsonTobean(str, InfoToAPPBean.class);
+                        int id = infoToAPPBean.getId();
+                        String copytext = infoToAPPBean.getCopytext();
+                        if (id != 0) {
                             MocAPPBean mocBean = MocAPPBean.getInstance();
                             mocBean.setId(id);
+                        } else if (copytext != null) {
+                            CopyUtil.copyToClipBoard(context, copytext);
+                            Looper.prepare();
+                            Toast.makeText(context, "群控大师:字段已复制到手机", Toast.LENGTH_LONG         ).show();
+                            Looper.loop();
                         }
 
 //                        router.route(str);

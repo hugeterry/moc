@@ -17,8 +17,7 @@ public class CopyUtil {
     public static void copyToClipBoard(Context context, String text) {
         ClipboardManager cm = (ClipboardManager) context.getSystemService(
                 Context.CLIPBOARD_SERVICE);
-        cm.setPrimaryClip(ClipData.newPlainText("coderfun_copy", text));
-        Toast.makeText(context, "复制成功", Toast.LENGTH_SHORT).show();
+        cm.setPrimaryClip(ClipData.newPlainText("moc_copy", text));
     }
 
 }
