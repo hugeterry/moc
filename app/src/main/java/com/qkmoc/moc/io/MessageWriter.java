@@ -21,18 +21,20 @@ public class MessageWriter implements MessageWritable {
     }
 
     public void write(final String message) {
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    byte[] srtbyte = message.getBytes();
-                    out.write(srtbyte);
-                } catch (IOException e) {
-                    // The socket went away
-                    executor.shutdownNow();
+        if (!executor.isShutdown()) {
+            executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        byte[] srtbyte = message.getBytes();
+                        out.write(srtbyte);
+                    } catch (IOException e) {
+                        // The socket went away
+                        executor.shutdownNow();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     public static class Pool implements MessageWritable {
