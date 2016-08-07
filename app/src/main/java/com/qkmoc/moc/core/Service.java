@@ -24,9 +24,11 @@ import com.qkmoc.moc.monitor.AirplaneModeMonitor;
 import com.qkmoc.moc.monitor.BatteryMonitor;
 import com.qkmoc.moc.monitor.BrowserPackageMonitor;
 import com.qkmoc.moc.monitor.ConnectivityMonitor;
+import com.qkmoc.moc.monitor.MiniStateMonitor;
 import com.qkmoc.moc.monitor.PhoneStateMonitor;
 import com.qkmoc.moc.util.CopyUtil;
 import com.qkmoc.moc.util.JsonUtil;
+import com.qkmoc.moc.util.RunShellUtils;
 import com.qkmoc.moc.view.IdentityActivity;
 
 import java.io.IOException;
@@ -152,10 +154,10 @@ public class Service extends android.app.Service {
 
                     addMonitor(new BatteryMonitor(this, writers));
                     addMonitor(new ConnectivityMonitor(this, writers));
-                    addMonitor(new PhoneStateMonitor(this, writers));
+//                    addMonitor(new PhoneStateMonitor(this, writers));
                     addMonitor(new AirplaneModeMonitor(this, writers));
-                    addMonitor(new BrowserPackageMonitor(this, writers));
-
+//                    addMonitor(new BrowserPackageMonitor(this, writers));
+                    addMonitor(new MiniStateMonitor(this, writers));
                     executor.submit(new Server(acceptor));
 
                     started = true;
@@ -259,15 +261,15 @@ public class Service extends android.app.Service {
                     writer = new MessageWriter(socket.getOutputStream());
                     writers.add(writer);
                     router = new MessageRouter(writer);
-
+                    MessageReader readerMini = new MessageReader(socket.getInputStream());
                     for (AbstractMonitor monitor : monitors) {
                         monitor.peek(writer);
                     }
                     while (!isInterrupted()) {
+
                         String str = reader.read();
 //                        System.out.println("strnull:" + str);
-                        InfoToAPPBean infoToAPPBean = new InfoToAPPBean();
-                        infoToAPPBean = JsonUtil.jsonTobean(str, InfoToAPPBean.class);
+                        InfoToAPPBean infoToAPPBean = JsonUtil.jsonTobean(str, InfoToAPPBean.class);
                         int id = infoToAPPBean.getId();
                         String copytext = infoToAPPBean.getCopytext();
                         if (id != 0) {

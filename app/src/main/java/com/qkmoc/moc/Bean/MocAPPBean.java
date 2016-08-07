@@ -17,6 +17,9 @@ public class MocAPPBean {
     private String ConnIsConnected = "connected";//是否有网络通信
     private String imei = "00000000000000";//imei
 
+    private boolean MinicapState = true;//minicap状态
+    private boolean MinitouchState = true;//minitouch状态
+
     public static MocAPPBean getInstance() {
         if (mocBean == null) {
             mocBean = new MocAPPBean();
@@ -88,5 +91,20 @@ public class MocAPPBean {
         this.imei = imei;
     }
 
+    public boolean isMinitouchState() {
+        return MinitouchState;
+    }
+
+    public void setMinitouchState(boolean minitouchState) {
+        MinitouchState = minitouchState;
+    }
+
+    public boolean isMinicapState() {
+        return MinicapState;
+    }
+
+    public void setMinicapState(boolean minicapState) {
+        MinicapState = minicapState;
+    }
 
 }
