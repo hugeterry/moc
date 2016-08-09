@@ -39,6 +39,7 @@ public class MiniStateMonitor extends AbstractMonitor {
                 e.printStackTrace();
             }
             report(writer);
+
         }
     }
 

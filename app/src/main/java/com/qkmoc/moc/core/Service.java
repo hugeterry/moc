@@ -10,7 +10,6 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.qkmoc.moc.Bean.InfoToAPPBean;
@@ -22,18 +21,13 @@ import com.qkmoc.moc.io.MessageWriter;
 import com.qkmoc.moc.monitor.AbstractMonitor;
 import com.qkmoc.moc.monitor.AirplaneModeMonitor;
 import com.qkmoc.moc.monitor.BatteryMonitor;
-import com.qkmoc.moc.monitor.BrowserPackageMonitor;
 import com.qkmoc.moc.monitor.ConnectivityMonitor;
 import com.qkmoc.moc.monitor.MiniStateMonitor;
-import com.qkmoc.moc.monitor.PhoneStateMonitor;
 import com.qkmoc.moc.util.CopyUtil;
 import com.qkmoc.moc.util.JsonUtil;
-import com.qkmoc.moc.util.RunShellUtils;
 import com.qkmoc.moc.view.IdentityActivity;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -56,7 +50,7 @@ public class Service extends android.app.Service {
     public static final String EXTRA_HOST = "com.qkmoc.moc.EXTRA_HOST";
     public static final String EXTRA_BACKLOG = "com.qkmoc.moc.EXTRA_BACKLOG";
 
-    private static final String TAG = "STFService";
+    private static final String TAG = "MOCService";
     private static final int NOTIFICATION_ID = 0x1;
 
     private List<AbstractMonitor> monitors = new ArrayList<AbstractMonitor>();
@@ -152,6 +146,7 @@ public class Service extends android.app.Service {
                 try {
                     acceptor = new ServerSocket(port, backlog, InetAddress.getByName(host));
 
+
                     addMonitor(new BatteryMonitor(this, writers));
                     addMonitor(new ConnectivityMonitor(this, writers));
 //                    addMonitor(new PhoneStateMonitor(this, writers));
@@ -202,6 +197,7 @@ public class Service extends android.app.Service {
 
             try {
                 acceptor.close();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -257,14 +253,17 @@ public class Service extends android.app.Service {
                 MessageRouter router = null;
 
                 try {
+                    Send send = new Send(socket, context);
+                    executor.submit(send);
                     MessageReader reader = new MessageReader(socket.getInputStream());
                     writer = new MessageWriter(socket.getOutputStream());
                     writers.add(writer);
                     router = new MessageRouter(writer);
-                    MessageReader readerMini = new MessageReader(socket.getInputStream());
                     for (AbstractMonitor monitor : monitors) {
                         monitor.peek(writer);
                     }
+
+
                     while (!isInterrupted()) {
 
                         String str = reader.read();
