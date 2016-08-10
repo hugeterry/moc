@@ -10,11 +10,15 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.qkmoc.moc.Bean.MocAPPBean;
+import com.qkmoc.moc.ServiceConfig;
+import com.qkmoc.moc.core.Service;
 import com.qkmoc.moc.io.MessageWritable;
 import com.qkmoc.moc.util.JsonUtil;
 import com.qkmoc.moc.util.RunShellUtils;
 
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 
 public class MiniStateMonitor extends AbstractMonitor {
@@ -23,10 +27,21 @@ public class MiniStateMonitor extends AbstractMonitor {
     private static final String[] minicap_cmd = {"ps", "|", "grep", "minicap"};
     String minitouch_state = null;
     String minicap_state = null;
-
+    Context context;
+    MessageWritable writer;
+    Socket socket;
 
     public MiniStateMonitor(Context context, MessageWritable writer) {
         super(context, writer);
+    }
+
+    public MiniStateMonitor(Context context, MessageWritable writer, ServerSocket socket) {
+        super(context, writer);
+        try {
+            this.socket = socket.accept();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -34,7 +49,7 @@ public class MiniStateMonitor extends AbstractMonitor {
         Log.i(TAG, "Monitor starting");
         while (true) {
             try {
-                Thread.sleep(3000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -71,7 +86,18 @@ public class MiniStateMonitor extends AbstractMonitor {
             Log.i("moc", "gsonString:" + gsonString);
         } else Log.i("moc", "minicap shell:" + minicap_state);
 
+        try {
 
+            socket.sendUrgentData(0);//发送1个字节的紧急数据，默认情况下，服务器端没有开启紧急数据处理，不影响正常通信
+            Log.i("MOC TAG", "SENDOKOKOKOKOK");
+        } catch (Exception se) {
+            Log.i("MOC TAG", "SENDNULLLLLLLLLLLLLLL");
+            if (!ServiceConfig.socketFirstStart ) {
+                ((Service) context).stopSelf();
+            }
+        }
+        System.out.println(ServiceConfig.socketFirstStart);
+        ServiceConfig.socketFirstStart = false;
     }
 
 
