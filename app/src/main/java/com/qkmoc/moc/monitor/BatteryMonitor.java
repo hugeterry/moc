@@ -80,17 +80,14 @@ public class BatteryMonitor extends AbstractMonitor {
         TelephonyManager tm = (TelephonyManager) context.getSystemService(context.TELEPHONY_SERVICE);
         minitouch_state = RunShellUtils.run(minitouch_cmd).trim();
         minicap_state = RunShellUtils.run(minicap_cmd).trim();
+
         MocAPPBean mocBean = MocAPPBean.getInstance();
         if (!minitouch_state.endsWith("minitouch")) {
             mocBean.setMinitouchState(false);
-            String gsonString = JsonUtil.beanToJson(mocBean);
-            Log.i("moc", "gsonString:" + gsonString);
         } else Log.i("moc", "minitouch shell:" + minitouch_state);
 
         if (!minicap_state.endsWith("minicap")) {
             mocBean.setMinicapState(false);
-            String gsonString = JsonUtil.beanToJson(mocBean);
-            Log.i("moc", "gsonString:" + gsonString);
         } else Log.i("moc", "minicap shell:" + minicap_state);
 
         mocBean.setWIFI(String.valueOf(wm.isWifiEnabled()));

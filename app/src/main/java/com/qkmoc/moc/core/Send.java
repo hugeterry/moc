@@ -30,7 +30,7 @@ public class Send extends Thread {
 
             try {
 
-                socket.sendUrgentData(0);//发送1个字节的紧急数据，默认情况下，服务器端没有开启紧急数据处理，不影响正常通信
+                socket.sendUrgentData(0xFF);//发送1个字节的紧急数据，默认情况下，服务器端没有开启紧急数据处理，不影响正常通信
                 Log.i("MOC TAG", "SENDOKOKOKOKOK");
             } catch (Exception se) {
                 Log.i("MOC TAG", "SENDNULLLLLLLLLLLLLLL");
@@ -40,12 +40,12 @@ public class Send extends Thread {
             }
             System.out.println(ServiceConfig.socketFirstStart);
             ServiceConfig.socketFirstStart = false;
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-
-            }
+//            try {
+//                Thread.sleep(3000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//
+//            }
         }
     }
 }
