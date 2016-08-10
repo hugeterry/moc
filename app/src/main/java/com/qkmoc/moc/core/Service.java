@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.qkmoc.moc.Bean.InfoToAPPBean;
 import com.qkmoc.moc.Bean.MocAPPBean;
 import com.qkmoc.moc.R;
+import com.qkmoc.moc.ServiceConfig;
 import com.qkmoc.moc.io.MessageReader;
 import com.qkmoc.moc.io.MessageRouter;
 import com.qkmoc.moc.io.MessageWriter;
@@ -152,10 +153,10 @@ public class Service extends android.app.Service {
 //                    addMonitor(new PhoneStateMonitor(this, writers));
                     addMonitor(new AirplaneModeMonitor(this, writers));
 //                    addMonitor(new BrowserPackageMonitor(this, writers));
-                    addMonitor(new MiniStateMonitor(this, writers));
+//                    addMonitor(new MiniStateMonitor(this, writers,acceptor));
                     executor.submit(new Server(acceptor));
 
-                    started = true;
+
                 } catch (UnknownHostException e) {
                     Log.e(TAG, e.getMessage());
                 } catch (IOException e) {
@@ -211,6 +212,8 @@ public class Service extends android.app.Service {
             ));
 
             try {
+                Send send = new Send(acceptor.accept(), context);
+                executor.submit(send);
                 while (!isInterrupted()) {
                     Connection conn = new Connection(acceptor.accept());
                     executor.submit(conn);
@@ -253,12 +256,12 @@ public class Service extends android.app.Service {
                 MessageRouter router = null;
 
                 try {
-                    Send send = new Send(socket, context);
-                    executor.submit(send);
-                    MessageReader reader = new MessageReader(socket.getInputStream());
+                    System.out.println("1111111111111");
                     writer = new MessageWriter(socket.getOutputStream());
                     writers.add(writer);
+                    MessageReader reader = new MessageReader(socket.getInputStream());
                     router = new MessageRouter(writer);
+
                     for (AbstractMonitor monitor : monitors) {
                         monitor.peek(writer);
                     }
