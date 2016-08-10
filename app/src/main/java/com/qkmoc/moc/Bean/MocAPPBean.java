@@ -17,6 +17,8 @@ public class MocAPPBean {
     private String ConnIsConnected = "connected";//是否有网络通信
     private String imei = "00000000000000";//imei
 
+    private String Serial="";
+
     private boolean MinicapState = true;//minicap状态
     private boolean MinitouchState = true;//minitouch状态
 
@@ -89,6 +91,14 @@ public class MocAPPBean {
 
     public void setImei(String imei) {
         this.imei = imei;
+    }
+
+    public String getSerial() {
+        return Serial;
+    }
+
+    public void setSerial(String serial) {
+        Serial = serial;
     }
 
     public boolean isMinitouchState() {
