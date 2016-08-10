@@ -6,6 +6,8 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.qkmoc.moc.ServiceConfig;
+
 import java.net.Socket;
 
 /**
@@ -24,25 +26,26 @@ public class Send extends Thread {
 
     @Override
     public void run() {
-        super.run();
         while (true) {
+
             try {
+
                 socket.sendUrgentData(0);//发送1个字节的紧急数据，默认情况下，服务器端没有开启紧急数据处理，不影响正常通信
                 Log.i("MOC TAG", "SENDOKOKOKOKOK");
             } catch (Exception se) {
                 Log.i("MOC TAG", "SENDNULLLLLLLLLLLLLLL");
-                Intent intent = new Intent();
-                intent.setAction("com.qkmoc.moc.ACTION_STOP");
-                context.startActivity(intent);
-                //未测试
-                ((Service) context).stopSelf();
+                if (!ServiceConfig.socketFirstStart) {
+                    ((Service) context).stopSelf();
+                }
             }
+            System.out.println(ServiceConfig.socketFirstStart);
+            ServiceConfig.socketFirstStart = false;
             try {
-                Thread.sleep(3000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
 
+            }
         }
     }
 }
