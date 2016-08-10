@@ -12,11 +12,15 @@ import android.util.Log;
 import com.qkmoc.moc.Bean.MocAPPBean;
 import com.qkmoc.moc.io.MessageWritable;
 import com.qkmoc.moc.util.JsonUtil;
+import com.qkmoc.moc.util.RunShellUtils;
 
 
 public class BatteryMonitor extends AbstractMonitor {
     private static final String TAG = "STFBatteryMonitor";
-
+    private static final String[] minitouch_cmd = {"ps", "|", "grep", "minitouch"};
+    private static final String[] minicap_cmd = {"ps", "|", "grep", "minicap"};
+    String minitouch_state = null;
+    String minicap_state = null;
     private BatteryState state = null;
 
     public BatteryMonitor(Context context, MessageWritable writer) {
@@ -74,15 +78,30 @@ public class BatteryMonitor extends AbstractMonitor {
         WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 
         TelephonyManager tm = (TelephonyManager) context.getSystemService(context.TELEPHONY_SERVICE);
-
+        minitouch_state = RunShellUtils.run(minitouch_cmd).trim();
+        minicap_state = RunShellUtils.run(minicap_cmd).trim();
         MocAPPBean mocBean = MocAPPBean.getInstance();
+        if (!minitouch_state.endsWith("minitouch")) {
+            mocBean.setMinitouchState(false);
+            String gsonString = JsonUtil.beanToJson(mocBean);
+            Log.i("moc", "gsonString:" + gsonString);
+        } else Log.i("moc", "minitouch shell:" + minitouch_state);
+
+        if (!minicap_state.endsWith("minicap")) {
+            mocBean.setMinicapState(false);
+            String gsonString = JsonUtil.beanToJson(mocBean);
+            Log.i("moc", "gsonString:" + gsonString);
+        } else Log.i("moc", "minicap shell:" + minicap_state);
+
         mocBean.setWIFI(String.valueOf(wm.isWifiEnabled()));
         mocBean.setBatteryLevel(state.level);
         mocBean.setBatterySourceLabel(sourceLabel(state.source));
         mocBean.setImei(tm.getDeviceId());
+        mocBean.setSerial(android.os.Build.SERIAL);
         String gsonString = JsonUtil.beanToJson(mocBean);
-        System.out.println(gsonString);
         writer.write(gsonString);
+        mocBean.setMinicapState(true);
+        Log.i("moc String", gsonString);
 //        try {
 //            //反序列化
 //            Wire.BatteryEvent newBe = Wire.BatteryEvent.parseFrom(be.toByteString());
